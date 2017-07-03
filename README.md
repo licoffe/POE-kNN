@@ -22,3 +22,7 @@ To run the indexer, type `node ./indexer.js`.
 To run the classifier, type `node ./main.js`.
 
 To specify the league, the properties of the object or the amount of neighbors to use, you can tweak the code of the classifier.
+
+### Credits
+The code for this tool is heavily inspired by the tutorial of [Burak Kanber](https://www.burakkanber.com/blog/machine-learning-in-js-k-nearest-neighbor-part-1/),  
+_Machine Learning in JS: k-nearest-neighbor Introduction_

@@ -1,0 +1,6 @@
+{
+    "dbAddress": "localhost",
+    "dbPort":    27017,
+    "dbName":    "POE",
+    "leagues":   ["Standard","Hardcore","Legacy","Hardcore Legacy"]
+}

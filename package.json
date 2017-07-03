@@ -1,0 +1,19 @@
+{
+  "name": "POE-kNN",
+  "version": "0.1.0",
+  "description": "Price rare items using kNN classifier",
+  "main": "main.js",
+  "repository": "",
+  "keywords": [
+    "Path of Exile",
+    "kNN",
+    "pricing"
+  ],
+  "author": "Licoffe",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^2.5.0",
+    "mongodb": "^2.2.29",
+    "request": "^2.81.0"
+  }
+}

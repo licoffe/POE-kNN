@@ -9,6 +9,46 @@ var Node        = require( "./modules/node.js" );
 var NodeList    = require( "./modules/nodeList.js" );
 var scriptName  = "KNN";
 
+// Settings ====================================================================
+var neighborsAmount = 4;        // Neighbor amount
+var league          = "Legacy"; // Main league
+// =============================================================================
+
+// Example objects
+// =============================================================================
+
+var objects = [
+    {
+        name: "Sadima's Touch",
+        type: "Wool Gloves",
+        frameType: 9,
+        features: {
+            "Adds # to # Fire Damage to Attacks": [4, 8],
+            "Adds # to # Lightning Damage to Attacks": [1, 13],
+            "+# to maximum Energy Shield": [18],
+            "#% increased Quantity of Items found": [24],
+            "price": false
+        }
+    },
+    {
+        name: "Random onyx amulet",
+        type: "Onyx Amulet",
+        frameType: 2,
+        features: {
+            // "Enemies can have 1 additional Curse": [],
+            "+# to Dexterity": [42],
+            "+#% to Global Critical Strike Multiplier": [28],
+            "+# to maximum Mana": [39],
+            "+# to maximum Energy Shield": [49],
+            // "#% of Physical Attack Damage Leeched as Life": [0.36],
+            "price": false
+        }
+    }
+];
+var objectToPrice = objects[0];
+
+// =============================================================================
+
 var connectToDB = function( callback ) {
 
     // Read config file
@@ -135,51 +175,13 @@ var queryData = function( db, query, rates, cb ) {
     });
 };
 
-// Example objects
-// =============================================================================
-
-// var object = {
-//     name: "Sadima",
-//     type: "Wool Gloves",
-//     frameType: 9,
-//     features: {
-//         "Adds # to # Fire Damage to Attacks": [4, 8],
-//         "Adds # to # Lightning Damage to Attacks": [1, 13],
-//         "+# to maximum Energy Shield": [18],
-//         "#% increased Quantity of Items found": [24],
-//         "price": false
-//     }
-// };
-
-var object = {
-    name: "test",
-    type: "Onyx Amulet",
-    frameType: 2,
-    features: {
-        // "Enemies can have 1 additional Curse": [],
-        "+# to Dexterity": [42],
-        "+#% to Global Critical Strike Multiplier": [28],
-        "+# to maximum Mana": [39],
-        "+# to maximum Energy Shield": [49],
-        // "#% of Physical Attack Damage Leeched as Life": [0.36],
-        "price": false
-    }
-};
-
-// =============================================================================
-
 // Gather object features
 var meaningfulFeatures = [];
-for ( var feature in object.features ) {
+for ( var feature in objectToPrice.features ) {
     if ( feature !== "price" ) {
         meaningfulFeatures.push( feature );
     }
 }
-
-// Settings ====================================================================
-var neighborsAmount = 4;        // Neighbor amount
-var league          = "Legacy"; // Main league
-// =============================================================================
 
 // Fetch last rates for all leagues
 Currency.getLastRates( function( rates ) {
@@ -202,8 +204,8 @@ var run = function( rates ) {
         connectToDB( function( db ) {
             queryData( db, { 
                 league: league, 
-                typeLine: object.type, 
-                frameType: object.frameType, 
+                typeLine: objectToPrice.type, 
+                frameType: objectToPrice.frameType, 
                 parsedExplicitMods: { $all: mods }, 
                 $or: [{ stashName: /([0-9.]+).*chaos|exa|alch|alt|fuse|divine|chance|jew|chisel|vaal|regret|regal|gcp|chrom|scour|blessed/ }, { note: /([0-9.]+).*chaos|exa|alch|alt|fuse|divine|chance|jew|chisel|vaal|regret|regal|gcp|chrom|scour|blessed/ }]}, rates,
                 function( entries, features ) {
@@ -215,7 +217,7 @@ var run = function( rates ) {
                         nodes.add( new Node( data[i], meaningfulFeatures ));
                     }
                     // Add the object to price to the node list
-                    nodes.add( new Node( object, meaningfulFeatures ));
+                    nodes.add( new Node( objectToPrice, meaningfulFeatures ));
 
                     nodes.determineUnknownPrice();
 

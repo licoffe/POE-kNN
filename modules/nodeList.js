@@ -78,7 +78,7 @@ class NodeList {
                     if ( !neighbor.features.price ) {
                         continue;
                     }
-                    this.nodes[i].neighbors.push( new Node( this.nodes[j]));
+                    this.nodes[i].neighbors.push( new Node( this.nodes[j], this.meaningfulFeatures ));
                 }
 
                 this.nodes[i].measureDistances( this.ranges );

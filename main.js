@@ -77,7 +77,7 @@ var objects = [
         features: {
             "#% increased Spell Damage": [21],
             // "Gain #% of Elemental Damage as Extra Chaos Damage": [14],
-            "Gain #% of Elemental Damage as Extra Chaos Damage": [15],
+            "Gain #% of Elemental Damage as Extra Chaos Damage": [20],
             "price": false
         }
     }
@@ -153,6 +153,7 @@ var queryData = function( db, query, rates, cb ) {
             if ( doc.note ) {
                 var matches = priceReg.exec( doc.note );
                 if ( !matches ) {
+                    console.log( doc.note );
                     entry.features.price = 0;
                 } else {
                     entry.features.price = matches[1] * rates[matches[2]];
@@ -160,6 +161,7 @@ var queryData = function( db, query, rates, cb ) {
             } else {
                 var matches = priceReg.exec( doc.stashName );
                 if ( !matches ) {
+                    console.log( doc.stashName );
                     entry.features.price = 0;
                 } else {
                     entry.features.price = matches[1] * rates[matches[2]];
@@ -212,6 +214,12 @@ var run = function( rates ) {
             logger.log( err, scriptName, "e" );
         }
         connectToDB( function( db ) {
+            // We want to keep only items with the following criteria:
+            // - Same league
+            // - Same type
+            // - Same rarity
+            // - All the required features (mods)
+            // - With a stash name or a note containing a valid currency
             queryData( db, { 
                 league: league, 
                 typeLine: objectToPrice.type, 

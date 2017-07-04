@@ -75,9 +75,9 @@ var objects = [
         type: "Sage Wand",
         frameType: 3,
         features: {
-            // "#% increased Spell Damage": [21],
-            // "Gain #% of Elemental Damage as extra Chaos Damage": [14],
-            "Gain #% of Elemental Damage as Extra Chaos Damage": [21],
+            "#% increased Spell Damage": [21],
+            // "Gain #% of Elemental Damage as Extra Chaos Damage": [14],
+            "Gain #% of Elemental Damage as Extra Chaos Damage": [15],
             "price": false
         }
     }
@@ -132,11 +132,8 @@ var queryData = function( db, query, rates, cb ) {
         ilvl: 1, 
         stashName: 1, 
         note: 1, 
-        parsedImplicitMods: 1, 
         frameType: 1,
-        parsedExplicitMods: 1, 
-        parsedCraftedMods: 1, 
-        parsedEnchantedMods: 1, 
+        parsedMods: 1, 
         name: 1, 
         typeLine: 1
     }).toArray( function( err, cursor ) {
@@ -169,39 +166,15 @@ var queryData = function( db, query, rates, cb ) {
                 }
             }
             if ( entry.features.price !== 0 ) {
-                async.each( doc.parsedImplicitMods, function( mod, cbMod ) {
+                async.each( doc.parsedMods, function( mod, cbMod ) {
                     if ( features.indexOf( mod.mod ) === -1 ) {
                         features.push( mod.mod );
                     }
                     entry.features[mod.mod] = mod.values;
                     cbMod();
                 }, function( err ) {
-                    async.each( doc.parsedExplicitMods, function( mod, cbMod ) {
-                        if ( features.indexOf( mod.mod ) === -1 ) {
-                            features.push( mod.mod );
-                        }
-                        entry.features[mod.mod] = mod.values;
-                        cbMod();
-                    }, function( err ) {
-                        async.each( doc.parsedCraftedMods, function( mod, cbMod ) {
-                            if ( features.indexOf( mod.mod ) === -1 ) {
-                                features.push( mod.mod );
-                            }
-                            entry.features[mod.mod] = mod.values;
-                            cbMod();
-                        }, function( err ) {
-                            async.each( doc.parsedEnchantedMods, function( mod, cbMod ) {
-                                if ( features.indexOf( mod.mod ) === -1 ) {
-                                    features.push( mod.mod );
-                                }
-                                entry.features[mod.mod] = mod.values;
-                                cbMod();
-                            }, function( err ) {
-                                entries.push( entry );
-                                cb();
-                            });
-                        });
-                    });
+                    entries.push( entry );
+                    cb();
                 });
             } else {
                 cb();
@@ -243,7 +216,7 @@ var run = function( rates ) {
                 league: league, 
                 typeLine: objectToPrice.type, 
                 frameType: objectToPrice.frameType, 
-                parsedExplicitMods: { $all: mods }, 
+                parsedMods: { $all: mods }, 
                 $or: [{ stashName: /([0-9.]+).*chaos|exa|alch|alt|fuse|divine|chance|jew|chisel|vaal|regret|regal|gcp|chrom|scour|blessed/ }, { note: /([0-9.]+).*chaos|exa|alch|alt|fuse|divine|chance|jew|chisel|vaal|regret|regal|gcp|chrom|scour|blessed/ }]}, rates,
                 function( entries, features ) {
                     logger.log( "Found " + entries.length + " entries" );

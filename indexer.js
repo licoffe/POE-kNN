@@ -229,10 +229,7 @@ var compareArrays = function( old, young, cb ) {
  * @return Pass four arrays to callback with extracted mods
  */
 var parseMods = function( item, callback ) {
-    var parsedExplicitMods  = [];
-    var parsedImplicitMods  = [];
-    var parsedCraftedMods   = [];
-    var parsedEnchantedMods = [];
+    var parsedMods = [];
     // console.time( "Parsing mods" );
     // Parse explicit mods
     async.each( item.explicitMods, function( mod, cbMod ) {
@@ -244,7 +241,7 @@ var parseMods = function( item, callback ) {
             match = re.exec( mod );
         }
         mod = mod.replace( re, "#" );
-        parsedExplicitMods.push({
+        parsedMods.push({
             "mod": mod,
             "values": matches
         });
@@ -263,7 +260,7 @@ var parseMods = function( item, callback ) {
                 match = re.exec( mod );
             }
             mod = mod.replace( re, "#" );
-            parsedImplicitMods.push({
+            parsedMods.push({
                 "mod": mod,
                 "values": matches
             });
@@ -282,7 +279,7 @@ var parseMods = function( item, callback ) {
                     match = re.exec( mod );
                 }
                 mod = mod.replace( re, "#" );
-                parsedCraftedMods.push({
+                parsedMods.push({
                     "mod": mod,
                     "values": matches
                 });
@@ -301,7 +298,7 @@ var parseMods = function( item, callback ) {
                         match = re.exec( mod );
                     }
                     mod = mod.replace( re, "#" );
-                    parsedEnchantedMods.push({
+                    parsedMods.push({
                         "mod": mod,
                         "values": matches
                     });
@@ -311,8 +308,7 @@ var parseMods = function( item, callback ) {
                         logger.log( "Error: " + err, script_name, "w" );
                     }
                     // console.timeEnd( "Parsing mods" );
-                    callback( parsedExplicitMods, parsedImplicitMods, 
-                              parsedCraftedMods, parsedEnchantedMods );
+                    callback( parsedMods );
                 });
             });
         });
@@ -437,7 +433,7 @@ var downloadChunk = function( chunkID, collection, db, callback ) {
                                 console.time( "DB insertion" );
                                 async.each( stash.items, function( item, cb ) {
 
-                                    parseMods( item, function( explicit, implicit, crafted, enchanted ) {
+                                    parseMods( item, function( parsedMods ) {
                                         item.accountName = stash.accountName;
                                         item.lastCharacterName = stash.lastCharacterName;
                                         item.stashID      = stash.id;
@@ -449,10 +445,7 @@ var downloadChunk = function( chunkID, collection, db, callback ) {
                                         item.available    = true;
                                         item.addedTs      = Date.now();
                                         item.updatedTs    = Date.now();
-                                        item.parsedImplicitMods  = implicit;
-                                        item.parsedExplicitMods  = explicit;
-                                        item.parsedCraftedMods   = crafted;
-                                        item.parsedEnchantedMods = enchanted;
+                                        item.parsedMods   = parsedMods;
                                         getLinksAmountAndColor( item, function( res ) {
                                             item.linkAmount   = res.linkAmount;
                                             item.colors       = res.colors;
@@ -511,19 +504,16 @@ var downloadChunk = function( chunkID, collection, db, callback ) {
                                     logger.log( res.common.length + " items to update", script_name, "", true );
                                     // For each removed item
                                     async.each( res.removed, function( removedItem, cbRemoved ) {
-                                        parseMods( removedItem, function( explicit, implicit, crafted, enchanted ) {
-                                            removedItem.parsedImplicitMods  = implicit;
-                                            removedItem.parsedExplicitMods  = explicit;
-                                            removedItem.parsedCraftedMods   = crafted;
-                                            removedItem.parsedEnchantedMods = enchanted;
-                                            removedItem.socketAmount        = removedItem.sockets.length;
+                                        parseMods( removedItem, function( parsedMods ) {
+                                            removedItem.parsedMods   = parsedMods;
+                                            removedItem.socketAmount = removedItem.sockets.length;
                                             // Set item status to unavailable
                                             logger.log( removedItem.id + " removed", script_name, "", true );
                                             removedItem.available = false;
                                             getLinksAmountAndColor( removedItem, function( res ) {
-                                                removedItem.linkAmount        = res.linkAmount;
-                                                removedItem.colors            = res.colors;
-                                                removedItem.linkedColors      = res.linkedColors;
+                                                removedItem.linkAmount   = res.linkAmount;
+                                                removedItem.colors       = res.colors;
+                                                removedItem.linkedColors = res.linkedColors;
                                                 // Update status in DB
                                                 collection.save( removedItem, function( err, result ) {
                                                     if ( err ) {
@@ -556,7 +546,7 @@ var downloadChunk = function( chunkID, collection, db, callback ) {
                                         // For each item added
                                         async.each( res.added, function( addedItem, cbAdded ) {
                                             logger.log( addedItem.id + " added", script_name, "", true );
-                                            parseMods( addedItem, function( explicit, implicit, crafted, enchanted ) {
+                                            parseMods( addedItem, function( parsedMods ) {
                                                 addedItem.accountName  = stash.accountName;
                                                 addedItem.stashID      = stash.id;
                                                 addedItem.stashName    = stash.stash;
@@ -568,10 +558,7 @@ var downloadChunk = function( chunkID, collection, db, callback ) {
                                                 addedItem.addedTs      = Date.now();
                                                 addedItem.updatedTs    = Date.now();
                                                 addedItem.lastCharacterName = stash.lastCharacterName;
-                                                addedItem.parsedImplicitMods  = implicit;
-                                                addedItem.parsedExplicitMods  = explicit;
-                                                addedItem.parsedCraftedMods   = crafted;
-                                                addedItem.parsedEnchantedMods = enchanted;
+                                                addedItem.parsedMods   = parsedMods;
                                                 getLinksAmountAndColor( addedItem, function( res ) {
                                                     addedItem.linkAmount   = res.linkAmount;
                                                     addedItem.colors       = res.colors;
@@ -606,12 +593,9 @@ var downloadChunk = function( chunkID, collection, db, callback ) {
                                             // For each item kept
                                             async.each( res.common, function( commonItem, cbCommon ) {
                                                 logger.log( commonItem.id + " updated", script_name, "", true );
-                                                parseMods( commonItem, function( explicit, implicit, crafted, enchanted ) {
-                                                    commonItem.parsedImplicitMods  = implicit;
-                                                    commonItem.parsedExplicitMods  = explicit;
-                                                    commonItem.parsedCraftedMods   = crafted;
-                                                    commonItem.parsedEnchantedMods = enchanted;
-                                                    commonItem.socketAmount        = commonItem.sockets.length;
+                                                parseMods( commonItem, function( parsedMods ) {
+                                                    commonItem.parsedMods   = parsedMods;
+                                                    commonItem.socketAmount = commonItem.sockets.length;
                                                     // Update its update timestamp
                                                     commonItem.updatedTs = Date.now();
                                                     getLinksAmountAndColor( commonItem, function( res ) {
@@ -768,10 +752,7 @@ function main() {
                 { "available": 1 },
                 { "ilvl": 1 },
                 { "linkAmount": 1 },
-                { "parsedImplicitMods.mod": 1 },
-                { "parsedExplicitMods.mod": 1 },
-                { "parsedCraftedMods.mod": 1 },
-                { "parsedEnchantedMods.mod": 1 },
+                { "parsedMods.mod": 1 }
             ];
 
             function createIndexs(indexFields){

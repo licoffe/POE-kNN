@@ -69,9 +69,20 @@ var objects = [
             "#% increased Attack Speed with Maces": [8],
             "price": false
         }
+    },
+    {
+        name: "Shade of Solaris",
+        type: "Sage Wand",
+        frameType: 3,
+        features: {
+            // "#% increased Spell Damage": [21],
+            // "Gain #% of Elemental Damage as extra Chaos Damage": [14],
+            "Gain #% of Elemental Damage as Extra Chaos Damage": [21],
+            "price": false
+        }
     }
 ];
-var objectToPrice = objects[3];
+var objectToPrice = objects[4];
 
 // =============================================================================
 

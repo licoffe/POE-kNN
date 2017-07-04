@@ -54,7 +54,6 @@ class NodeList {
                 }
             }
         }
-        console.log( this.ranges );
     }
 
     /**
@@ -90,7 +89,7 @@ class NodeList {
                 logger.log( "Prices\n=====================================" );
                 console.log( prices );
                 logger.log( "Proposed price\n=====================================" );
-                logger.log( this.nodes[i].name + ": " + this.nodes[i].guess.price + " c" );
+                logger.log( this.nodes[i].name + " - " + this.nodes[i].type + ": " + this.nodes[i].guess.price + " c" );
                 if ( this.nodes[i].guess.avgDistance > 0.5 ) {
                     logger.log( "Average distance > 0.5: " + Math.round( this.nodes[i].guess.avgDistance * 1000 ) / 1000, "", "e" );
                 }

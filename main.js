@@ -43,9 +43,35 @@ var objects = [
             // "#% of Physical Attack Damage Leeched as Life": [0.36],
             "price": false
         }
+    },
+    {
+        name: "Eagle Keep",
+        type: "Vaal Regalia",
+        frameType: 2,
+        features: {
+            // "# Life Regenerated per second": [4.1],
+            // "+# to maximum Mana": [28],
+            "#% increased Energy Shield": [130],
+            "+# to maximum Energy Shield": [136],
+            "+#% to Fire Resistance": [29],
+            "+#% to Lightning Resistance": [30],
+            "price": false
+        }
+    },
+    {
+        name: "Pandemonium Blunt",
+        type: "Crimson Jewel",
+        frameType: 2,
+        features: {
+            // "#% increased Damage over Time": [12],
+            "#% increased Attack Speed": [3],
+            "#% increased Attack Speed while holding a Shield": [4],
+            "#% increased Attack Speed with Maces": [8],
+            "price": false
+        }
     }
 ];
-var objectToPrice = objects[0];
+var objectToPrice = objects[3];
 
 // =============================================================================
 
@@ -210,16 +236,18 @@ var run = function( rates ) {
                 $or: [{ stashName: /([0-9.]+).*chaos|exa|alch|alt|fuse|divine|chance|jew|chisel|vaal|regret|regal|gcp|chrom|scour|blessed/ }, { note: /([0-9.]+).*chaos|exa|alch|alt|fuse|divine|chance|jew|chisel|vaal|regret|regal|gcp|chrom|scour|blessed/ }]}, rates,
                 function( entries, features ) {
                     logger.log( "Found " + entries.length + " entries" );
-                    // Create a new node list and add all entries to it
-                    var nodes = new NodeList( neighborsAmount, meaningfulFeatures );
-                    var data = entries;
-                    for ( var i in data ) {
-                        nodes.add( new Node( data[i], meaningfulFeatures ));
-                    }
-                    // Add the object to price to the node list
-                    nodes.add( new Node( objectToPrice, meaningfulFeatures ));
+                    if ( entries.length > 0 ) {
+                        // Create a new node list and add all entries to it
+                        var nodes = new NodeList( neighborsAmount, meaningfulFeatures );
+                        var data = entries;
+                        for ( var i in data ) {
+                            nodes.add( new Node( data[i], meaningfulFeatures ));
+                        }
+                        // Add the object to price to the node list
+                        nodes.add( new Node( objectToPrice, meaningfulFeatures ));
 
-                    nodes.determineUnknownPrice();
+                        nodes.determineUnknownPrice();
+                    }
 
                     // Close db and program
                     db.close();
